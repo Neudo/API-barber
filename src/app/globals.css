@@ -17,13 +17,30 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: #F8EFE8;
+}
+
+h1{
+  font-size: 4.5rem;
+  font-weight: bold;
+}
+
+h2{
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+button{
+  border: 2px solid darkgreen;
+  padding: 7px 10px;
+  color: darkgreen;
+  transition: color 0.3s, background-color 0.3s;
+  border-radius: 8px;
+}
+
+button:hover{
+  background-color: darkgreen;
+  color: white;
 }
 
 @layer utilities {
