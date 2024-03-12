@@ -3,6 +3,7 @@ const bookingSchema = new Schema({
         worker: String,
         day: String,
         slot: String,
+        service: String
     },
     {
         timestamps: true

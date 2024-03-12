@@ -5,11 +5,11 @@ import BookingModel from "@/app/models/booking.model";
 
 export async function POST(request: NextRequest) {
     try {
-        const { worker, day, slot } = await request.json()
-        console.log("Data to create:", { worker, day, slot });
+        const { worker, day, slot, service } = await request.json()
+        console.log("Data to create:", { worker, day, slot, service });
 
         await connectToMongo()
-        await BookingModel.create({ worker, day, slot })
+        await BookingModel.create({ worker, day, slot, service })
         await mongoose.connection.close()
         return NextResponse.json({ message: "Booked" }, { status: 201 })
     } catch (err) {
