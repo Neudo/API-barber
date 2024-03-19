@@ -18,3 +18,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: "Failed to book " }, { status: 400 })
     }
 }
+
+export async function GET(request: NextRequest) {
+    try {
+        await connectToMongo()
+        const bookings = await BookingModel.find()
+        await mongoose.connection.close()
+        return NextResponse.json(bookings, { status: 200 })
+    } catch (err) {
+        console.error(err)
+        await mongoose.connection.close()
+        return NextResponse.json({ message: "Failed to fetch bookings" }, { status: 400 })
+    }
+}

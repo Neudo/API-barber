@@ -1,19 +1,28 @@
 'use client';
 import Image from "next/image";
 import mainShop from "@/app/assets/images/barber_inside.webp";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
-
+interface SlotInfo {
+    slot: string;
+    day: string;
+}
 
 export default function Page() {
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false)
     const [worker, setWorker] = useState('Seba')
-    const today = new Date().toLocaleDateString('fr-FR');
+    const today = new Date().toISOString().split('T')[0];
     const [day, setDay] = useState(today)
     const [slot, setSlot] = useState('')
     const [service, setService] = useState('')
     let hourValue = 8;
+    let [disabledSlots, setDisabledSlots] = useState<SlotInfo[]>([]);
+    let slotFree:boolean
+
+    console.log(day)
+
+
 
     const sendData = async (event: React.FormEvent<HTMLFormElement>) => {
 
@@ -34,6 +43,54 @@ export default function Page() {
             alert('Something went wrong!');
         }
     }
+
+    const getData = async () => {
+        const response = await fetch('/api/booking', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setDisabledSlots(data.map((item: SlotInfo) => ({
+                slot: item.slot,
+                day: item.day,
+            })))
+        } else {
+            alert('Something went wrong!');
+        }
+    }
+
+    useEffect(() => {
+        getData()
+    }, [day])
+
+
+    const checkSlot = (slot: string, date: string): boolean => {
+        return disabledSlots.some((disabledSlot) => disabledSlot.slot === slot && disabledSlot.day === date)
+    };
+
+    const generateSlotInputs = () => {
+        let hourValue = 8
+        return [...Array(21)].map((x, i) => {
+            const hour = i % 2 === 0 ? ++hourValue : hourValue
+            const minutes = i % 2 === 0 ? '00' : '30'
+            const slotId = `${hour}:${minutes}`
+            const slotDisabled = checkSlot(slotId, day)
+
+            console.log(slotDisabled)
+
+            return (
+                <label htmlFor={slotId} key={i}>
+                    {hour}:{minutes}
+                    <input onChange={(e) => setSlot(e.target.id)} key={i} type="radio" id={slotId} name="at" disabled={slotDisabled} />
+                </label>
+            );
+        });
+    };
+
 
     const handleCloseConfirmationModal = () => {
 
@@ -80,12 +137,12 @@ export default function Page() {
                             }}>reserver
                             </button>
                         </div></li>
-                    <li className="p-4 border-black border mb-2 rounded-2xl flex justify-between items-center">Défrisage à la kératine avec shampoing et coup
+                    <li className="p-4 border-black border mb-2 rounded-2xl flex justify-between items-center">Défrisage à la kératine avec shampoing et coupe
                         <div className="actions">
                             <span className="mr-3">55€</span>
                             <button onClick={() => {
                                 setModalIsOpen(true)
-                                setService('Défrisage à la kératine avec shampoing et coup')
+                                setService('Défrisage à la kératine avec shampoing et coupe')
                             }}>reserver
                             </button>
                         </div></li>
@@ -111,17 +168,26 @@ export default function Page() {
 
 
                         <label htmlFor="date">Date
-                            <input onChange={e => setDay(e.target.value)}  type="date" id="date" name="date" value={day}/>
+                            <input onChange={e => setDay(e.target.value)}   type="date" id="date" name="date" value={day}/>
                         </label>
 
-                        <div className="wrapper flex flex-col mb-5 max-h-80 overflow-scroll ">
-                            {[...Array(21)].map((x, i) => {
-                                i % 2 === 0 ? hourValue++ : hourValue
-                                return <label
-                                    htmlFor={`${hourValue}:${i % 2 === 0 ? '00' : '30'}`} key={i} > {hourValue} : {i % 2 === 0 ? '00' : '30'}
-                                    <input onChange={e => setSlot(e.target.id)} key={i}  type="radio" id={`${hourValue}:${i % 2 === 0 ? '00' : '30'}`} name="at"/>
-                                </label>
-                            })}
+                        <div className="wrapper flex flex-col mb-5 max-h-72 overflow-scroll ">
+                            {generateSlotInputs()}
+                        </div>
+                        <div className="wrapper flex flex-col">
+                            <h2>Vos informations</h2>
+                            <label htmlFor="name">Prénom
+                                <input type="text" id="name" name="name"/>
+                            </label>
+                            <label htmlFor="phone">Téléphone
+                                <input type="tel" id="phone" name="phone"/>
+                            </label>
+
+                            <label htmlFor="email">Email
+                                <input type="email" id="email" name="email"/>
+                            </label>
+
+
                         </div>
                         <button type="submit">Réserver</button>
                     </form>
@@ -129,18 +195,16 @@ export default function Page() {
             </div>
 
             <div className={`modal transition duration-300 fixed ${confirmationModalIsOpen ? 'left-0' : 'left-[-100%]'} top-0 w-full h-full bg-black/20  `}>
-                <div className="modal-content rounded-3xl w-1/2 m-auto bg-amber-50 py-5 px-10 h-4/6 overflow-scroll relative top-10 flex flex-col">
+                <div className="modal-content rounded-3xl w-1/2 m-auto bg-amber-50 py-5 px-10 h-4/6 overflow-scroll relative top-10 flex flex-col justify-around">
                     <h2>Confirmation de votre réservation</h2>
-                    <p>Votre réservation a bien été prise en compte</p>
+                    <h3>Votre réservation a bien été prise en compte.</h3>
                     <p>Coiffeur : {worker}</p>
                     <p>Date : {day}</p>
                     <p>Heure : {slot}</p>
                     <p>Prestation : {service}</p>
-                    <button onClick={ handleCloseConfirmationModal}>Fermer</button>
+                    <button className="mt-5" onClick={ handleCloseConfirmationModal}>Fermer</button>
                 </div>
             </div>
-
-
         </main>
     );
 }
