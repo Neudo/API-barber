@@ -20,10 +20,6 @@ export default function Page() {
     let [disabledSlots, setDisabledSlots] = useState<SlotInfo[]>([]);
     let slotFree:boolean
 
-    console.log(day)
-
-
-
     const sendData = async (event: React.FormEvent<HTMLFormElement>) => {
 
         event.preventDefault();
