@@ -6,6 +6,7 @@ import Link from "next/link";
 function Header() {
     return (
         <header className="p-6">
+            <h1 className="text-3xl font-bold">Coupe coupe</h1>
             <Link href={"/"} >
                 <Image
                     src={logo}

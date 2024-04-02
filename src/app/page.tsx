@@ -1,4 +1,4 @@
-import ShopCard from "@/app/components/shopCard";
+import ShopCard from "@/app/components/ShopCard";
 import Image from "next/image";
 import hero from "@/app/assets/images/hero.jpeg";
 import MyMap from "@/app/components/MyMap";
